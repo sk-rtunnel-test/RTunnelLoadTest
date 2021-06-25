@@ -14,8 +14,8 @@ public class LoadTestClient extends Thread {
     private static final int NUM_PARALLEL_THREADS = 1000;
     private static final int REPORT_EACH_THREAD_AFTER_NUM_MESSAGES = 10;
 
-    private static final String RTUNNEL_SERVER_HOST = "172.16.20.183";
-    private static final int RTUNNEL_SERVER_FORWARD_PORT = 9004;
+    private static final String RTUNNEL_SERVER_HOST = "localhost";
+    private static final int RTUNNEL_SERVER_FORWARD_PORT = 8080;
 
     public static void main(String[] args) {
         for (int i = 0; i < NUM_PARALLEL_THREADS; i++) {
