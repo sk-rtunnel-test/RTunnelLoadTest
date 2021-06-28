@@ -14,10 +14,10 @@ public class UDPRtunnelClient extends Thread {
     private static final int TOTAL_PARALLEL_THREADS = 100000;
     private static final int REPORT_EACH_THREAD_AFTER_NUM_MESSAGES = 10;
 
-    private static long GRAND_TOTAL_MESSAGEs_FROM_ALL_THREADS = 0;
-    private static long GRAND_TOTAL_SUCCESSFUL_MESSAGES_FROM_ALL_THREADS = 0;
+    private static volatile long GRAND_TOTAL_MESSAGEs_FROM_ALL_THREADS = 0;
+    private static volatile long GRAND_TOTAL_SUCCESSFUL_MESSAGES_FROM_ALL_THREADS = 0;
 
-    private static boolean drop = false;
+    private static volatile boolean drop = false;
 
     public static void main(String [] args) {
         for (int i = 0; i < TOTAL_PARALLEL_THREADS; i++) {
