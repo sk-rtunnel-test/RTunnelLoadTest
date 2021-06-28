@@ -10,9 +10,6 @@ public class UDPRtunnelClient extends Thread {
     private DatagramSocket socket;
     private InetAddress address;
     
-    //private String TUNNEL_SERVER_HOST = "vmskecm10630.eng12.ocl";
-    //private int TUNNEL_PORT = 7002;
-
     private String TUNNEL_SERVER_HOST = "localhost";
     private int TUNNEL_PORT = 60000;
 
