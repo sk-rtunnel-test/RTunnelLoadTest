@@ -7,9 +7,7 @@ import java.net.InetAddress;
 import java.util.Date;
 
 public class UDPRtunnelClient extends Thread {
-    private DatagramSocket socket;
-    private InetAddress address;
-    
+
     private String TUNNEL_SERVER_HOST = "localhost";
     private int TUNNEL_PORT = 60000;
 
@@ -33,13 +31,17 @@ public class UDPRtunnelClient extends Thread {
         try {
             UDPRtunnelClient client = new UDPRtunnelClient();
 
+            DatagramSocket socket = new DatagramSocket();
+            InetAddress address = InetAddress.getByName(TUNNEL_SERVER_HOST);
+
             int total_messages = 0;
             int total_successful_messages = 0;
 
             while (true) {
+
                 String testmessage = new Date().toString() + " the latest and greatest format !!!";
                 total_messages++;
-                String received = client.sendEcho(testmessage);
+                String received = client.sendEcho(testmessage, socket, address);
                 if (!testmessage.equals(received)) {
                     System.out.println("Error Connecting");
                     drop = true;
@@ -62,16 +64,7 @@ public class UDPRtunnelClient extends Thread {
         }
     }
 
-    public UDPRtunnelClient() {
-        try {
-            socket = new DatagramSocket();
-            address = InetAddress.getByName(TUNNEL_SERVER_HOST);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public String sendEcho(String msg) throws IOException {
+    public String sendEcho(String msg, DatagramSocket socket, InetAddress address) throws IOException {
         buf = msg.getBytes();
         DatagramPacket packet
                         = new DatagramPacket(buf, buf.length, address, TUNNEL_PORT);
@@ -83,7 +76,7 @@ public class UDPRtunnelClient extends Thread {
         return received;
     }
 
-    public void close() {
+    public void close(DatagramSocket socket) {
         socket.close();
     }
 }
