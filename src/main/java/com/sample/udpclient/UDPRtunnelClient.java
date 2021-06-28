@@ -16,8 +16,9 @@ public class UDPRtunnelClient extends Thread {
 
     private static volatile long GRAND_TOTAL_MESSAGEs_FROM_ALL_THREADS = 0;
     private static volatile long GRAND_TOTAL_SUCCESSFUL_MESSAGES_FROM_ALL_THREADS = 0;
-
     private static volatile boolean drop = false;
+    private static volatile int TOTAL_THREADS = 0;
+    private static volatile int TOTAL_FAILED_THREADS = 0;
 
     public static void main(String [] args) {
         for (int i = 0; i < TOTAL_PARALLEL_THREADS; i++) {
@@ -25,22 +26,30 @@ public class UDPRtunnelClient extends Thread {
         }
     }
 
-
     public void run() {
+        DatagramSocket socket = null;
+        InetAddress address = null;
         try {
-            UDPRtunnelClient client = new UDPRtunnelClient();
+            socket = new DatagramSocket();
+            address = InetAddress.getByName(TUNNEL_SERVER_HOST);
+        } catch (Exception ex) {
+            System.out.println("Error Initialising THread");
+            ex.printStackTrace();
+            TOTAL_FAILED_THREADS++;
+            return;
+        }
 
-            DatagramSocket socket = new DatagramSocket();
-            InetAddress address = InetAddress.getByName(TUNNEL_SERVER_HOST);
+        TOTAL_THREADS++;
+        int total_messages = 0;
+        int total_successful_messages = 0;
 
-            int total_messages = 0;
-            int total_successful_messages = 0;
+        while (true) {
 
-            while (true) {
-
-                String testmessage = new Date().toString() + " the latest and greatest format !!!";
-                total_messages++;
-                String received = client.sendEcho(testmessage, socket, address);
+            String testmessage =
+                            new Date().toString() + " the latest and greatest format !!!" + GRAND_TOTAL_MESSAGEs_FROM_ALL_THREADS;
+            total_messages++;
+            try {
+                String received = sendEcho(testmessage, socket, address);
                 if (!testmessage.equals(received)) {
                     System.out.println("Error Connecting");
                     System.out.println("Expected : " + testmessage + " , But found : " + received);
@@ -55,12 +64,16 @@ public class UDPRtunnelClient extends Thread {
                     System.out.println("Total Messages = " + total_messages);
                     System.out.println("Total FRP successful messages = " + total_successful_messages);
                     System.out.println("Grand Total Messages from all threads = " + GRAND_TOTAL_MESSAGEs_FROM_ALL_THREADS);
-                    System.out.println("Grand Total Successful Messages from all threads = " + GRAND_TOTAL_SUCCESSFUL_MESSAGES_FROM_ALL_THREADS);
+                    System.out.println("Grand Total Successful Messages from all threads = "
+                                    + GRAND_TOTAL_SUCCESSFUL_MESSAGES_FROM_ALL_THREADS);
+                    System.out.println("Total Threads = " + TOTAL_THREADS);
+                    System.out.println("Total Failed Threads = " + TOTAL_FAILED_THREADS);
                     System.out.println("Atleast 1 connection drop = " + drop);
                 }
+            } catch (Exception ex) {
+                ex.printStackTrace();
             }
-        } catch (Exception ex) {
-            ex.printStackTrace();
+
         }
     }
 
