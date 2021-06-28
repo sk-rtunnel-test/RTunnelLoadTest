@@ -18,7 +18,6 @@ public class UDPRtunnelClient extends Thread {
     private static long GRAND_TOTAL_SUCCESSFUL_MESSAGES_FROM_ALL_THREADS = 0;
 
     private static boolean drop = false;
-    private byte[] buf;
 
     public static void main(String [] args) {
         for (int i = 0; i < TOTAL_PARALLEL_THREADS; i++) {
@@ -65,7 +64,7 @@ public class UDPRtunnelClient extends Thread {
     }
 
     public String sendEcho(String msg, DatagramSocket socket, InetAddress address) throws IOException {
-        buf = msg.getBytes();
+        byte[] buf = msg.getBytes();
         DatagramPacket packet
                         = new DatagramPacket(buf, buf.length, address, TUNNEL_PORT);
         socket.send(packet);
