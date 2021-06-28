@@ -43,6 +43,7 @@ public class UDPRtunnelClient extends Thread {
                 String received = client.sendEcho(testmessage, socket, address);
                 if (!testmessage.equals(received)) {
                     System.out.println("Error Connecting");
+                    System.out.println("Expected : " + testmessage + " , But found : " + received);
                     drop = true;
                 } else {
                     total_successful_messages++;
