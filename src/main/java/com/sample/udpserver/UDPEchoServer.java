@@ -8,7 +8,6 @@ public class UDPEchoServer extends Thread {
 
     private DatagramSocket socket;
     private boolean running;
-    private byte[] buf = new byte[256];
 
     private int port = 60000;
 
@@ -30,6 +29,8 @@ public class UDPEchoServer extends Thread {
         while (running) {
 
             try {
+                byte[] buf = new byte[256];
+
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
 
