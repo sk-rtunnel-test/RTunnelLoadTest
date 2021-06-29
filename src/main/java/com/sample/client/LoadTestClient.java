@@ -12,10 +12,16 @@ public class LoadTestClient extends Thread {
     private static final Logger logger = LoggerFactory.getLogger(LoadTestClient.class);
 
     private static final int NUM_PARALLEL_THREADS = 1000;
-    private static final int REPORT_EACH_THREAD_AFTER_NUM_MESSAGES = 10;
+    private static final int REPORT_EACH_THREAD_AFTER_NUM_MESSAGES = 100;
 
-    private static final String RTUNNEL_SERVER_HOST = "localhost";
-    private static final int RTUNNEL_SERVER_FORWARD_PORT = 8080;
+    private static final String TUNNEL_SERVER_HOST = "vmskecm10630.eng12.ocl";
+    private static final int TUNNEL_SERVER_FORWARD_PORT = 7002;
+
+    private static volatile int GRAND_TOTAL_NUMBER_OF_MESSAGES = 0;
+    private static volatile int GRAND_TOTAL_NUMBER_OF_SUCCESSFUL_MESSAGES = 0;
+    private static volatile int GRAND_TOTAL_NUMBER_OF_UNSUCCESSFUL_MESSAGES = 0;
+    private static volatile int TOTAL_THREADS = 0;
+    private static volatile boolean fail = false;
 
     public static void main(String[] args) {
         for (int i = 0; i < NUM_PARALLEL_THREADS; i++) {
@@ -26,29 +32,39 @@ public class LoadTestClient extends Thread {
     public void run() {
 
         RestTemplate restTemplate = new RestTemplate();
-        String pingResourceUrl = "http://" + RTUNNEL_SERVER_HOST + ":" + RTUNNEL_SERVER_FORWARD_PORT + "/ping";
+        String pingResourceUrl = "http://" + TUNNEL_SERVER_HOST + ":" + TUNNEL_SERVER_FORWARD_PORT + "/ping";
 
-        int total_messages = 0;
-        int total_rtunnel_successful_messages = 0;
+        boolean counted = false;
 
         while (true) {
             try {
-                total_messages++;
+                GRAND_TOTAL_NUMBER_OF_MESSAGES++;
 
                 HttpStatus response = restTemplate.getForEntity(pingResourceUrl, String.class).getStatusCode();
 
                 if (response.equals(HttpStatus.OK)) {
-                    total_rtunnel_successful_messages++;
+                    GRAND_TOTAL_NUMBER_OF_SUCCESSFUL_MESSAGES++;
                 } else {
-                    logger.info("There was an Rtunnel failure message");
+                    logger.info("There was a Tunnel failure message");
                     logger.info(response.toString());
+                    fail = true;
+                    GRAND_TOTAL_NUMBER_OF_UNSUCCESSFUL_MESSAGES++;
                 }
-                if (total_messages % REPORT_EACH_THREAD_AFTER_NUM_MESSAGES == 0) {
+                if (GRAND_TOTAL_NUMBER_OF_MESSAGES % REPORT_EACH_THREAD_AFTER_NUM_MESSAGES == 0) {
                     logger.info(new Date().toString());
-                    logger.info("Total Messages = " + total_messages);
-                    logger.info("Total Rtunnel successful messages = " + total_rtunnel_successful_messages);
+                    logger.info("Total Messages = " + GRAND_TOTAL_NUMBER_OF_MESSAGES);
+                    logger.info("Total Tunnel successful messages = " + GRAND_TOTAL_NUMBER_OF_SUCCESSFUL_MESSAGES);
+                    logger.info("Total Tunnel Unsuccessful messages = " + GRAND_TOTAL_NUMBER_OF_UNSUCCESSFUL_MESSAGES);
+                    logger.info("Total Threads = " + TOTAL_THREADS);
+                    logger.info("At least 1 fail = " + fail);
+                }
+                if (!counted) {
+                    counted = true;
+                    TOTAL_THREADS++;
                 }
             } catch (Exception ex) {
+                fail = true;
+                GRAND_TOTAL_NUMBER_OF_UNSUCCESSFUL_MESSAGES++;
                 logger.error("Error Processing Packet.", ex);
             }
         }
